@@ -20,7 +20,7 @@ func (app *application) routes() http.Handler {
 		app.methodNotAllowedResponse(c)
 	})
 
-	r.GET("v1/healthcheck", app.healthCheckHandler)
+	r.GET("/v1/healthcheck", app.healthCheckHandler)
 
 	v1 := r.Group("/v1")
 	{

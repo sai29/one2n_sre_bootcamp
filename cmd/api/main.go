@@ -4,14 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/sai29/one2n_sre_bootcamp/internal/data"
 	"github.com/sai29/one2n_sre_bootcamp/internal/jsonlog"
+
+	_ "github.com/lib/pq"
 )
 
 type config struct {
@@ -36,14 +40,18 @@ type application struct {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	var cfg config
 
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	port, _ := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	flag.IntVar(&cfg.port, "port", port, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (dev|stage|prod)")
 
-	pw := os.Getenv("DB_PW")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", fmt.Sprintf("postgres://student_api:%s@localhost/student_api?sslmode=disable",
-		pw), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("STUDENT_API_DB_DSN"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "Postgres max open conns")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "Postgres max idle conns")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "Postgres max conn idle time")

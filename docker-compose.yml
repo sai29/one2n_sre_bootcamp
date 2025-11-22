@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:17
+    container_name: student-api-postgres
+    environment:
+      POSTGRES_USER: student_api
+      POSTGRES_PASSWORD: pa55word
+      POSTGRES_DB: student_api
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
