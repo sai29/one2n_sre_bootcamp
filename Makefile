@@ -12,6 +12,9 @@ build:
 run:
 		go run ./cmd/api
 
+test:
+		go test ./... -v -cover
+
 dev:
 		air
 

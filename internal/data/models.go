@@ -14,7 +14,15 @@ var (
 )
 
 type Models struct {
-	Students StudentModel
+	Students StudentStore
+}
+
+type StudentStore interface {
+	Insert(*Student) error
+	Get(int64) (*Student, error)
+	ListAll() ([]*Student, error)
+	Update(*Student) error
+	Delete(int64) error
 }
 
 func NewModels(db *sql.DB) Models {
