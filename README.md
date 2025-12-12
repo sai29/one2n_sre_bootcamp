@@ -7,7 +7,7 @@ A simple REST service for practicing infra/SRE concepts: env-based config, migra
 ### Requirements
 
 - `Go` (1.22+)
-- `Docker` + Docker Compose
+- `Docker` + `Docker Compose`
 - `air` (for hot reload)
 - `migrate` (DB schema migrations)
 
@@ -45,6 +45,11 @@ make test
 make migrate
 make docker-up
 ```
+
+### Production deployment
+
+1. To run the docker container on prod first build the container with `make build-prod VERSION=version`, local semver tag (change version as needed)
+2. Then run `make run-prod` to run the container
 ### Postman Collection
 Import this file into Postman:  
 [`student_api.postman_collection.json`](./postman/student_api.postman_collection.json)
