@@ -43,10 +43,8 @@ WORKDIR /app
 
 COPY --from=builder /app/students_api .
 
-ENV PORT=8080
+ENV PORT=4000
 
-EXPOSE 8080
+EXPOSE 4000
 
 CMD ["./students_api"]
-
-

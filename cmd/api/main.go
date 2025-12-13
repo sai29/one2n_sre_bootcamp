@@ -42,16 +42,18 @@ type application struct {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("error loading .env file")
 	}
 
 	var cfg config
 
-	port, _ := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	port := mustGetIntEnv("SERVER_PORT")
 	flag.IntVar(&cfg.port, "port", port, "API server port")
-	flag.StringVar(&cfg.env, "env", "development", "Environment (dev|stage|prod)")
 
-	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("STUDENT_API_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.env, "env", getEnv("ENV", "development"), "Environment (dev|stage|prod)")
+
+	flag.StringVar(&cfg.db.dsn, "db-dsn", mustGetEnv("STUDENT_API_DB_DSN"), "PostgreSQL DSN")
+
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "Postgres max open conns")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "Postgres max idle conns")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "Postgres max conn idle time")
@@ -116,4 +118,28 @@ func openDB(cfg config) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func mustGetEnv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		log.Fatalf("%s must be set", key)
+	}
+	return val
+}
+
+func mustGetIntEnv(key string) int {
+	val := mustGetEnv(key)
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		log.Fatalf("%s must be a valid integer", key)
+	}
+	return i
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
 }
