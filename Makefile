@@ -5,38 +5,61 @@ endif
 
 APP_NAME=student_api
 MIGRATIONS_DIR=./migrations
+COMPOSE=docker compose
+NETWORK := $(shell basename "$(PWD)")_default
 
 # ---- Docker image variables ----
 IMAGE ?= student-api
 VERSION ?= v0.1.0
 GIT_SHA ?= $(shell git rev-parse --short HEAD)
 
-.PHONY: build run test dev migrate migrate-down docker-up docker-down clean \
-				build-prod build-debug run-prod run-debug tag push
+.PHONY: \
+	db-up db-migrate api-build api-up dev down reset \
+	local-build local-run local-dev local-migrate local-migrate-down \
+	test clean build-prod build-debug run-prod run-debug tag push
 
-build:
+db-up:
+		${COMPOSE} up -d db
+
+db-migrate:
+		docker run --rm \
+		--network ${NETWORK} \
+		-v ${PWD}/migrations:/migrations \
+		migrate/migrate \
+		-path=/migrations \
+		-database "$$STUDENT_API_DB_DSN" up
+
+api-build:
+		${COMPOSE} build api
+
+api-up:
+		${COMPOSE} up -d api
+
+dev: db-up db-migrate api-build api-up
+
+down:
+		${COMPOSE} down
+
+reset:
+		${COMPOSE} down -v
+
+local-build:
 		go build -o $(APP_NAME)
 
-run:
+local-run:
 		go run ./cmd/api
 
 test:
 		go test ./... -v -cover
 
-dev:
+local-dev:
 		air
 
-migrate:
+local-migrate:
 		migrate -path=$(MIGRATIONS_DIR) -database="$(STUDENT_API_DB_DSN)" up
 
-migrate-down:
+local-migrate-down:
 		migrate -path=$(MIGRATIONS_DIR) -database="$(STUDENT_API_DB_DSN)" down 1
-
-docker-up:
-		docker compose up -d
-
-docker-down:
-		docker compose down
 
 clean:
 		rm -f $(APP_NAME)
@@ -50,7 +73,7 @@ build-debug:
 
 run-prod:
 		docker run -d --name $(IMAGE)-prod \
-		--network one2n_sre_bootcamp_default \
+		--network ${NETWORK} \
 		--env-file .env \
 		-v "$(PWD)/.env:/app/.env:ro" \
 		-p 4000:4000 \
@@ -58,7 +81,7 @@ run-prod:
 
 run-debug:
 		docker run --rm -it --name $(IMAGE)-debug \
-		--network one2n_sre_bootcamp_default \
+		--network ${NETWORK} \
 		--env-file .env \
 		-v "$(PWD)/.env:/app/.env:ro" \
 		-p 4000:4000 \

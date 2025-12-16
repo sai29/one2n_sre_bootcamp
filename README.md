@@ -6,50 +6,70 @@ A simple REST service for practicing infra/SRE concepts: env-based config, migra
 
 ### Requirements
 
-- `Go` (1.22+)
-- `Docker` + `Docker Compose`
-- `air` (for hot reload)
-- `migrate` (DB schema migrations)
+- `Docker`
+- `Docker Compose`
+- `GNU Make`
+
+You can verify if the required tools are installed by running:
+
+`./scripts/install-deps.sh`
 
 ## Setup
 
-### Install air  
-
-- `curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh`
-
-### Install migrate
-
-- `curl -L https://github.com/golang-migrate/migrate/releases/download/$version/migrate.$os-$arch.tar.gz | tar xvz`
-
-### Steps
-
-1. Run `go build` to install dependencies.
-2. Run `docker compose up -d` to run the `docker` setup for setting up the Postgres DB.
-3. Create a `.env` file and set 
+1. Create a `.env` file and set 
   ```
-  STUDENT_API_DB_DSN=postgres://user:pass@localhost:5432/student_api?sslmode=disable
-  SERVER_PORT=8080
+  STUDENT_API_DB_DSN=postgres://student_api:pa55word@db:5432/student_api?sslmode=disable
+  SERVER_PORT=4000
+  GIN_MODE=release
   ```
-4. Run `migrate -path=./migrations -database=$STUDENT_API_DB_DSN up` to run the migrations.
-5. Run `air` to start the server and run the API.
+
+### Start Application 
+
+- `make dev`
+
+This will:
+
+- start Postgres
+
+- run database migrations
+
+- build the API image
+
+- start the API container
+
+API will be available at: http://localhost:4000
+
+### Server logs
+
+- `docker compose logs -f api`
+
+### Stop the Server 
+
+- `make down`
 
 ### Makefile
 
-Check the `Makefile` all the commands, some are mentioned below.
+The primary supported workflow is:
 
-```
-make build
-make run
-make dev
-make test
-make migrate
-make docker-up
-```
+- `make dev` — start the full local development environment
 
-### Production deployment
+Other targets exist for experimentation, debugging, or to simulate prod runs.
+See the `Makefile` for details.
 
-1. To run the docker container on prod first build the container with `make build-prod VERSION=version`, local semver tag (change version as needed)
-2. Then run `make run-prod` to run the container
+### Production run local 
+
+These commands simulate a production-style container locally.
+
+1. First build the container with `make build-prod VERSION=version`, local semver tag (change version as needed).
+2. Then run `make run-prod` to run the container.
+
+### Debug image
+
+The debug image includes a shell and is useful for inspecting runtime behavior locally.
+
+1. First build the container with `make build-debug`.
+2. Then run `make run-debug` to run the container and get shell access.
+
 ### Postman Collection
 Import this file into Postman:  
 [`student_api.postman_collection.json`](./postman/student_api.postman_collection.json)
