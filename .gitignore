@@ -25,5 +25,8 @@
 !Dockerfile
 !*.dockerignore
 
+!.github/
+!.github/**
+
 # ...even if they are in subdirectories
 !*/

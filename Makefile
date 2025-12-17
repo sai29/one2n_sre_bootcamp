@@ -9,14 +9,14 @@ COMPOSE=docker compose
 NETWORK := $(shell basename "$(PWD)")_default
 
 # ---- Docker image variables ----
-IMAGE ?= student-api
+IMAGE ?= ghcr.io/sai29/one2n_sre_bootcamp
 VERSION ?= v0.1.0
 GIT_SHA ?= $(shell git rev-parse --short HEAD)
 
 .PHONY: \
 	db-up db-migrate api-build api-up dev down reset \
 	local-build local-run local-dev local-migrate local-migrate-down \
-	test clean build-prod build-debug run-prod run-debug tag push
+	test clean build-prod build-debug run-prod run-debug tag push lint
 
 db-up:
 		${COMPOSE} up -d db
@@ -37,6 +37,9 @@ api-up:
 
 dev: db-up db-migrate api-build api-up
 
+lint:
+		golangci-lint run
+
 down:
 		${COMPOSE} down
 
@@ -44,7 +47,7 @@ reset:
 		${COMPOSE} down -v
 
 local-build:
-		go build -o $(APP_NAME)
+		go build -o $(APP_NAME) ./cmd/api
 
 local-run:
 		go run ./cmd/api

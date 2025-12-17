@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - "cmd/**"
+      - "internal/**"
+      - "go.mod"
+      - "go.sum"
+      - "Dockerfile"
+      - "Makefile"
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: action/checkout@v4
+
+      - name: Build API
+        run: make local-build
+      
+      - name: Run tests
+        run: make test
+      
+      - name: Run lint
+        run: make lint
+      
+      - name: GCR login
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | \
+          docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      
+      - name: Docker build
+        run: make build-prod
+      
+      - name: Docker push
+        run: make push

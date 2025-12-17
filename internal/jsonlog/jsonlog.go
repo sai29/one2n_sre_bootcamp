@@ -55,17 +55,17 @@ func NewLogger(out io.Writer, minLevel Level) *Logger {
 
 // PrintInfo is a helper that writes Info level log entries.
 func (l *Logger) PrintInfo(message string, properties map[string]string) {
-	l.print(LevelInfo, message, properties)
+	_, _ = l.print(LevelInfo, message, properties)
 }
 
 // PrintError is a helper that writes Info level log entries.
 func (l *Logger) PrintError(err error, properties map[string]string) {
-	l.print(LevelError, err.Error(), properties)
+	_, _ = l.print(LevelError, err.Error(), properties)
 }
 
 // PrintFatal is a helper that writes Info level log entries. It also terminates the application.
 func (l *Logger) PrintFatal(err error, properties map[string]string) {
-	l.print(LevelFatal, err.Error(), properties)
+	_, _ = l.print(LevelFatal, err.Error(), properties)
 	os.Exit(1)
 }
 

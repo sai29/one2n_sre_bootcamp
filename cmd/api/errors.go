@@ -45,6 +45,7 @@ func (app *application) badRequestResponse(c *gin.Context, err error) {
 	app.errorResponse(c, http.StatusBadRequest, err.Error())
 }
 
+//nolint:unused
 func (app *application) failedValidationResponse(c *gin.Context, errors map[string]string) {
 	app.errorResponse(c, http.StatusUnprocessableEntity, errors)
 }
@@ -54,34 +55,40 @@ func (app *application) editConflictResponse(c *gin.Context) {
 	app.errorResponse(c, http.StatusConflict, message)
 }
 
+//nolint:unused
 func (app *application) rateLimitExceededResponse(c *gin.Context) {
 	message := "rate limit exceeded"
 	app.errorResponse(c, http.StatusTooManyRequests, message)
 }
 
 // === Authentication / Authorization Errors ===
-
+//
+//nolint:unused
 func (app *application) invalidCredentialsResponse(c *gin.Context) {
 	message := "invalid authentication credentials"
 	app.errorResponse(c, http.StatusUnauthorized, message)
 }
 
+//nolint:unused
 func (app *application) invalidAuthenticationTokenResponse(c *gin.Context) {
 	c.Header("WWW-Authenticate", "Bearer")
 	message := "invalid or missing authentication token"
 	app.errorResponse(c, http.StatusUnauthorized, message)
 }
 
+//nolint:unused
 func (app *application) authenticationRequiredResponse(c *gin.Context) {
 	message := "you must be authenticated to access this resource"
 	app.errorResponse(c, http.StatusUnauthorized, message)
 }
 
+//nolint:unused
 func (app *application) inactiveAccountResponse(c *gin.Context) {
 	message := "your user account must be activated to access this resource"
 	app.errorResponse(c, http.StatusForbidden, message)
 }
 
+//nolint:unused
 func (app *application) notPermittedResponse(c *gin.Context) {
 	message := "you do not have the necessary permissions to access this resource"
 	app.errorResponse(c, http.StatusForbidden, message)
