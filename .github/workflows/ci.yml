@@ -11,6 +11,10 @@ on:
       - "Makefile"
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   ci:
     runs-on: self-hosted
