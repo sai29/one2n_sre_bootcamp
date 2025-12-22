@@ -96,3 +96,12 @@ tag:
 push:
 		docker push $(IMAGE):sha-$(GIT_SHA)
 		docker push $(IMAGE):$(VERSION)
+
+prod-up:
+	docker compose -f docker-compose.prod.yml up -d
+
+prod-down:
+	docker compose -f docker-compose.prod.yml down
+
+prod-logs:
+	docker compose -f docker-compose.prod.yml logs -f

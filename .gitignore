@@ -28,6 +28,8 @@ go.work.sum
 # env file
 .env
 
+.vagrant/
+
 # Editor/IDE
 # .idea/
 # .vscode/
