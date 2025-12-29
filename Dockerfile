@@ -43,7 +43,7 @@ WORKDIR /app
 
 COPY --from=builder /app/students_api .
 
-ENV PORT=4000
+ENV SERVER_PORT=4000
 
 EXPOSE 4000
 

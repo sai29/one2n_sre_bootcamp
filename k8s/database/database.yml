@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-api-db-config
+  namespace: student-api
+data:
+  POSTGRES_DB: student_api
+  POSTGRES_PORT: "5432"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-api-db
+  namespace: student-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-api-db
+  template:
+    metadata:
+      labels:
+        app: student-api-db
+    spec:
+      nodeSelector:
+        type: database
+      containers:
+        - name: postgres
+          image: postgres:17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-db-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_USERNAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: student-api-db
+  namespace: student-api
+spec:
+  type: ClusterIP
+  selector:
+    app: student-api-db
+  ports:
+    - port: 5432
+      targetPort: 5432

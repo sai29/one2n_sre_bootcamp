@@ -10,7 +10,7 @@ NETWORK := $(shell basename "$(PWD)")_default
 
 # ---- Docker image variables ----
 IMAGE ?= ghcr.io/sai29/one2n_sre_bootcamp
-VERSION ?= v0.1.0
+VERSION ?= v0.1.1
 GIT_SHA ?= $(shell git rev-parse --short HEAD)
 
 .PHONY: \
@@ -105,3 +105,14 @@ prod-down:
 
 prod-logs:
 	docker compose -f docker-compose.prod.yml logs -f
+
+
+minikube-local-image:
+	docker build --target prod-run \
+	-t localhost:5000/student-api:$(VERSION) .
+	docker push localhost:5000/student-api:$(VERSION)
+
+minikube-migrations-image:
+	docker build -f Dockerfile.migrations \
+		-t localhost:5000/student-api-migrations:$(VERSION) .
+	docker push localhost:5000/student-api-migrations:$(VERSION)

@@ -52,7 +52,7 @@ func main() {
 
 	flag.StringVar(&cfg.env, "env", getEnv("ENV", "development"), "Environment (dev|stage|prod)")
 
-	flag.StringVar(&cfg.db.dsn, "db-dsn", mustGetEnv("STUDENT_API_DB_DSN"), "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", mustGetEnv("DATABASE_URL"), "PostgreSQL DSN")
 
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "Postgres max open conns")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "Postgres max idle conns")
