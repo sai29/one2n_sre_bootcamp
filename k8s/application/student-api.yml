@@ -29,12 +29,10 @@ spec:
         - name: run-migrations
           image: localhost:5000/student-api-migrations:v0.1.1
           command:
-            - sh
-            - -c
-            - |
-              migrate -path=/migrations \
-                -database "postgres://${DB_USERNAME}:${DB_PASSWORD}@student-api-db:5432/student_api?sslmode=disable" \
-                up
+            - migrate
+            - -path=/migrations
+            - -database=$(DATABASE_URL)
+            - up
           env:
             - name: DB_USERNAME
               valueFrom:
@@ -46,7 +44,14 @@ spec:
                 secretKeyRef:
                   name: student-api-db-secret
                   key: DB_PASSWORD
-
+            - name: DB_HOST
+              value: student-api-db
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: student_api
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 
       containers:
         - name: student-api
@@ -54,27 +59,6 @@ spec:
           ports:
             - containerPort: 4000
           env:
-            - name: SERVER_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: student-api-config
-                  key: SERVER_PORT
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: student-api-db-secret
-                  key: DATABASE_URL
-            - name: GIN_MODE
-              valueFrom:
-                configMapKeyRef:
-                  name: student-api-config
-                  key: GIN_MODE
-            - name: DB_HOST
-              value: student-api-db
-            - name: DB_PORT
-              value: "5432"
-            - name: DB_NAME
-              value: student_api
             - name: DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -85,6 +69,24 @@ spec:
                 secretKeyRef:
                   name: student-api-db-secret
                   key: DB_PASSWORD
+            - name: DB_HOST
+              value: student-api-db
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: student_api
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: SERVER_PORT
+            - name: GIN_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: GIN_MODE
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 ---
 apiVersion: v1
 kind: Service

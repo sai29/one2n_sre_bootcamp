@@ -5,7 +5,6 @@ metadata:
   namespace: student-api
 data:
   POSTGRES_DB: student_api
-  POSTGRES_PORT: "5432"
 ---
 apiVersion: apps/v1
 kind: Deployment
