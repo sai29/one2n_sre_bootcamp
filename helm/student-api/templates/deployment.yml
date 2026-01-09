@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "student-api.fullname" .}}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "student-api.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels: 
+        {{- include "student-api.selectorLabels" . | nindent 8}}
+    spec:
+      nodeSelector:
+        type: application
+
+      initContainers:
+        - name: run-migrations
+          image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
+          imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+          command:
+            - migrate
+            - -path=/migrations
+            - -database=$(DATABASE_URL)
+            - up
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_PASSWORD
+            - name: DB_HOST
+              value: student-api-db
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: student_api
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
+
+      containers:
+        - name: student-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 4000
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: student-api-db-secret
+                  key: DB_PASSWORD
+            - name: DB_HOST
+              value: student-api-db
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: student_api
+            - name: SERVER_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: SERVER_PORT
+            - name: GIN_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: student-api-config
+                  key: GIN_MODE
+            - name: DATABASE_URL
+              value: postgres://$(DB_USERNAME):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable

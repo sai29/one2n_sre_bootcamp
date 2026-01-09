@@ -1,0 +1,20 @@
+fullnameOverride: student-api-db
+
+auth:
+  username: student_api
+  database: student_api
+  existingSecret: student-api-db-secret
+
+primary:
+  persistence:
+    enabled: true
+    size: 1Gi
+
+volumePermissions:
+  enabled: true
+
+podSecurityContext:
+  fsGroup: 1001
+
+containerSecurityContext:
+  runAsUser: 1001

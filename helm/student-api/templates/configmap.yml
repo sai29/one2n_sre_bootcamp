@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-api-config
+  labels:
+    {{- include "student-api.labels" . | nindent 4}}
+data:
+  SERVER_PORT: "4000"
+  GIN_MODE: "release"

@@ -15,6 +15,7 @@ A simple REST service for practicing infra/SRE concepts: env-based config, migra
 - Minikube
 - kubectl
 - Helm
+- Vault
 
 You can verify if the required tools are installed by running:
 
@@ -223,5 +224,139 @@ Expected response:
 ```bash
 {"env":"development","status":"available"}
 ```
+---
 
 
+## Deploying the Stack Using Helm
+
+
+---
+
+### Prerequisites
+
+* Kubernetes cluster (tested with Minikube)
+* `kubectl`
+* `helm`
+
+
+---
+
+### Helm Chart Structure
+
+```
+helm/
+├── namespaces     # Namespace creation (Helm-owned)
+├── vault          # HashiCorp Vault (community chart + values)
+├── postgres       # PostgreSQL (Bitnami chart, vendored)
+├── secrets        # SecretStore + ExternalSecret (Vault → K8s wiring)
+└── student-api    # REST API (Deployment, Service, ConfigMap)
+```
+
+Each chart has a **single responsibility** and clear boundaries.
+
+---
+
+### One-Time Manual Steps (Required)
+
+Vault bootstrap actions are **intentionally not Helm-managed** because they are unsafe to replay.
+
+1. Initialize Vault:
+
+   ```
+   kubectl exec -n student-api -it vault-0 -- vault operator init
+   ```
+
+2. Unseal Vault (run 3 times with different keys out of the 5 generated in the previous step):
+
+   ```
+   kubectl exec -n student-api -it vault-0 -- vault operator unseal
+   ```
+
+3. Create a Vault policy for External Secrets Operator:
+
+   ```
+   kubectl exec -n student-api -it vault-0 -- vault policy write eso-policy - <<EOF
+   path "secret/data/student-api/*" {
+     capabilities = ["read"]
+   }
+   EOF
+   ```
+
+4. Store the Vault token as a Kubernetes Secret:
+
+   ```
+   kubectl create secret generic vault-eso-token \
+     -n student-api \
+     --from-literal=token=<VAULT_TOKEN>
+   ```
+
+---
+
+### Deployment Order (Authoritative)
+
+Helm charts must be installed in the following order:
+
+1. Namespace
+
+   ```
+   helm install namespaces ./helm/namespaces
+   ```
+
+2. Vault
+
+   ```
+   helm install vault hashicorp/vault \
+     -n student-api \
+     -f helm/vault/values.yaml
+   ```
+
+3. External Secrets Operator
+
+   ```
+   helm install external-secrets external-secrets/external-secrets \
+     -n external-secrets
+   ```
+
+4. Secrets (Vault → Kubernetes wiring)
+
+   ```
+   helm install secrets ./helm/secrets -n student-api
+   ```
+
+5. PostgreSQL
+
+   ```
+   helm install postgres ./helm/postgres/postgres \
+     -n student-api \
+     -f helm/postgres/values.yml
+   ```
+
+6. REST API
+
+   ```
+   helm install student-api ./helm/student-api -n student-api
+   ```
+
+---
+
+### Verification
+
+Check that all pods are running:
+
+```
+kubectl get pods -n student-api
+```
+
+Verify the API:
+
+```
+curl http://<node-ip>:<node-port>/v1/healthcheck
+```
+
+Expected response:
+
+```
+{"env":"development","status":"available"}
+```
+
+---
