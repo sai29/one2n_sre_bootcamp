@@ -258,7 +258,13 @@ Each chart has a **single responsibility** and clear boundaries.
 
 ### One-Time Manual Steps (Required)
 
-Vault bootstrap actions are **intentionally not Helm-managed** because they are unsafe to replay.
+#### Note on Vault storage (local setup)
+
+In the local Minikube environment, Vault is run without durable persistence due to hostPath permission constraints.
+
+The Helm chart is structured to support persistent storage, but for local development the focus is on Helm ownership, dependency wiring, and end-to-end secret propagation rather than data durability.
+
+In a real environment, Vault would run with a persistent backend (e.g. file, Raft, or cloud storage) and proper volume permissions.
 
 1. Initialize Vault:
 
