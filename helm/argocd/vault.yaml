@@ -9,12 +9,13 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/sai29/one2n_sre_bootcamp.git
-    targetRevision: main
+    repoURL: https://helm.releases.hashicorp.com
+    chart: vault
+    targetRevision: 0.31.0
     path: helm/vault
     helm:
       valueFiles:
-        - ../../environements/local/vault.yml
+        - ../../environments/local/vault.yml
 
   destination:
     server: https://kubernetes.default.svc
