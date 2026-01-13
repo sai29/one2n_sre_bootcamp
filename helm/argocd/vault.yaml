@@ -12,7 +12,6 @@ spec:
     repoURL: https://helm.releases.hashicorp.com
     chart: vault
     targetRevision: 0.31.0
-    path: helm/vault
     helm:
       valueFiles:
         - ../../environments/local/vault.yml
