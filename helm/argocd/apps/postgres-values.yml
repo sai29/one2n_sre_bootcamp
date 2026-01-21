@@ -1,0 +1,21 @@
+fullnameOverride: student-api-db
+
+auth:
+  # For now hardcoding to bootstrap then will fetch it via ESO
+  username: student_api
+  database: student_api
+  password: pa55word
+
+primary:
+  persistence:
+    enabled: true
+    size: 1Gi
+
+volumePermissions:
+  enabled: true
+
+podSecurityContext:
+  fsGroup: 1001
+
+containerSecurityContext:
+  runAsUser: 1001

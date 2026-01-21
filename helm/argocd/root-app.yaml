@@ -1,26 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: student-api
+  name: root
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
-
 spec:
   project: default
 
   source:
     repoURL: https://github.com/sai29/one2n_sre_bootcamp.git
     targetRevision: main
-    path: helm/student-api
-    helm:
-      valueFiles:
-        - ../../environments/local/student-api.yml
-
+    path: helm/argocd/apps
+    directory:
+      recurse: true
+  
   destination:
     server: https://kubernetes.default.svc
-    namespace: student-api
-
+    namespace: argocd
+  
   syncPolicy:
     automated:
       prune: true
