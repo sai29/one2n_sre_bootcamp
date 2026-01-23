@@ -2,6 +2,9 @@ fullnameOverride: student-api-db
 
 auth:
   existingSecret: student-api-db-secret
+  secretKeys:
+    adminPasswordKey: POSTGRES_PASSWORD
+
 
 primary:
   persistence:
