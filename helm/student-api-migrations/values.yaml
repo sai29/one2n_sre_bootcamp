@@ -1,5 +1,5 @@
 image:
-  repository: localhost:5000/student-api-migrations
+  repository: student-api-migrations
   tag: "0.1.1"
   pullPolicy: IfNotPresent
 
