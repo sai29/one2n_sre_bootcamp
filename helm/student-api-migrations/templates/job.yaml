@@ -17,8 +17,7 @@ spec:
         - name: student-api-migrations
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - migrate
+          args:
             - -path=/migrations
             - -database=$(DATABASE_URL)
             - up
