@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: student-api-migrations
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/sai29/one2n_sre_bootcamp.git
+    targetRevision: main
+    path: helm/student-api-migrations
+    helm:
+      releaseName: student-api-migrations
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: student-api
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
