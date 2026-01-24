@@ -1,6 +1,6 @@
 image:
   repository: student-api-migrations
-  tag: "0.1.2"
+  tag: "0.1.3"
   pullPolicy: Never
 
 envSecretName: student-api-db-secret
