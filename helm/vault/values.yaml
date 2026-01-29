@@ -1,23 +1,21 @@
 server:
-  # 1. Disable the disk entirely
   dataStorage:
-    enabled: false
+    enabled: true
+    size: 10Gi
 
-  # 2. Standard security
-  podSecurityContext:
-    runAsNonRoot: true
-    fsGroup: 1000
   securityContext:
     runAsUser: 100
     runAsGroup: 1000
+    fsGroup: 1000
+    runAsNonRoot: true
 
-  standalone:
-    enabled: true
-    config: |
-      ui = true
-      listener "tcp" {
-        address = "0.0.0.0:8200"
-        tls_disable = 1
-      }
-      # This is the secret sauce: use RAM to bypass the permission error
-      storage "inmem" {}
+  extraInitContainers:
+    - name: fix-permissions
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - |
+          chown -R 100:1000 /vault/data
+      securityContext:
+        runAsUser: 0

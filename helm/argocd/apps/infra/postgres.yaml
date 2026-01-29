@@ -14,7 +14,7 @@ spec:
     targetRevision: 18.2.0
     helm:
       valueFiles:
-      - $values/helm/argocd/apps/infra/postgres-values.yaml
+      - $values/helm/postgres/values.yaml
 
   - repoURL: 'https://github.com/sai29/one2n_sre_bootcamp.git'
     targetRevision: main
