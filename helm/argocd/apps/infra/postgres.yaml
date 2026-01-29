@@ -20,7 +20,6 @@ spec:
     targetRevision: main
     ref: values
 
-
   destination:
     server: https://kubernetes.default.svc
     namespace: student-api

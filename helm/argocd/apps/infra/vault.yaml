@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
 
-  source:
+  sources:
     - repoURL: https://helm.releases.hashicorp.com
       chart: vault
       targetRevision: 0.31.0
@@ -20,7 +20,6 @@ spec:
       targetRevision: main
       ref: values
     
-
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
