@@ -9,13 +9,6 @@ server:
     fsGroup: 1000
     runAsNonRoot: true
 
-  extraInitContainers:
-    - name: fix-permissions
-      image: busybox:1.36
-      command:
-        - sh
-        - -c
-        - |
-          chown -R 100:1000 /vault/data
-      securityContext:
-        runAsUser: 0
+  extraEnvironmentVars:
+    SKIP_CHOWN: "false"
+    SKIP_SETCAP: "true"
