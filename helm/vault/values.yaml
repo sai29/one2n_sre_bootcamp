@@ -1,7 +1,6 @@
 server:
   dataStorage:
-    enabled: true
-    size: 10Gi
+    enabled: false
 
   securityContext:
     runAsUser: 100
@@ -9,6 +8,11 @@ server:
     fsGroup: 1000
     runAsNonRoot: true
 
+  ha:
+    enabled: false
+
   extraEnvironmentVars:
-    SKIP_CHOWN: "false"
     SKIP_SETCAP: "true"
+
+ui:
+  enabled: true
