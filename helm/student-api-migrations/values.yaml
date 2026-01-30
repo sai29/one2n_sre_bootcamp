@@ -1,7 +1,7 @@
 image:
-  repository: student-api-migrations
-  tag: "0.1.3"
-  pullPolicy: Never
+  repository: localhost:5000/student-api-migrations
+  tag: "0.1.1"
+  pullPolicy: IfNotPresent
 
 envSecretName: student-api-db-secret
 

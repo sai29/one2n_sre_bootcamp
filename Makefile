@@ -12,6 +12,8 @@ NETWORK := $(shell basename "$(PWD)")_default
 IMAGE ?= ghcr.io/sai29/one2n_sre_bootcamp
 VERSION ?= v0.1.1
 GIT_SHA ?= $(shell git rev-parse --short HEAD)
+REGISTRY ?= 127.0.0.1:5000
+
 
 .PHONY: \
 	db-up db-migrate api-build api-up dev down reset \
@@ -109,10 +111,10 @@ prod-logs:
 
 minikube-local-image:
 	docker build --target prod-run \
-	-t localhost:5000/student-api:$(VERSION) .
-	docker push localhost:5000/student-api:$(VERSION)
+	-t $(REGISTRY)/student-api:$(VERSION) .
+	docker push $(REGISTRY)/student-api:$(VERSION)
 
 minikube-migrations-image:
 	docker build -f Dockerfile.migrations \
-		-t localhost:5000/student-api-migrations:$(VERSION) .
-	docker push localhost:5000/student-api-migrations:$(VERSION)
+		-t $(REGISTRY)/student-api-migrations:$(VERSION) .
+	docker push $(REGISTRY)/student-api-migrations:$(VERSION)
