@@ -8,6 +8,7 @@ auth:
 
   username: student_api
   database: student_api
+  password: pa55word
 
 
 primary:
