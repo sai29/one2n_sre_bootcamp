@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: kube-prometheus-stack
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -13,8 +15,9 @@ spec:
     chart: kube-prometheus-stack
     targetRevision: 67.4.0
     helm:
-      valueFIles:
-        - $values/helm/observaility/kube-prometheus-stack/values.yaml
+      valueFiles:
+        - $values/helm/observability/kube-prometheus-stack/values.yaml
+      skipCrds: true
 
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
@@ -35,4 +38,10 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=false
-      - ServerSideAplly=true
+      - ServerSideApply=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
