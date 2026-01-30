@@ -4,6 +4,10 @@ auth:
   existingSecret: student-api-db-secret
   secretKeys:
     adminPasswordKey: POSTGRES_PASSWORD
+    userPasswordKey: password
+
+  username: student_api
+  database: student_api
 
 
 primary:
