@@ -9,7 +9,10 @@ global:
 prometheus:
   prometheusSpec:
     retention: 7d
-
+    
+    nodeSelector:
+      type: dependent_services
+    
     resources:
       requests:
         cpu: 200m
@@ -17,15 +20,18 @@ prometheus:
       limits:
         cpu: 500m
         memory: 1Gi
-
+    
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
 
 grafana:
   enabled: true
-
+  
   adminPassword: admin
-
+  
+  nodeSelector:
+    type: dependent_services
+  
   resources:
     requests:
       cpu: 100m
@@ -33,7 +39,7 @@ grafana:
     limits:
       cpu: 200m
       memory: 256Mi
-
+  
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -46,8 +52,11 @@ grafana:
 
 alertmanager:
   enabled: true
-
+  
   alertmanagerSpec:
+    nodeSelector:
+      type: dependent_services
+    
     resources:
       requests:
         cpu: 50m
@@ -56,9 +65,13 @@ alertmanager:
         cpu: 200m
         memory: 256Mi
 
+prometheusOperator:
+  nodeSelector:
+    type: dependent_services
+
 nodeExporter:
   enabled: true
-
+  
   resources:
     requests:
       cpu: 50m
@@ -69,7 +82,10 @@ nodeExporter:
 
 kubeStateMetrics:
   enabled: true
-
+  
+  nodeSelector:
+    type: dependent_services
+  
   resources:
     requests:
       cpu: 50m
@@ -77,4 +93,3 @@ kubeStateMetrics:
     limits:
       cpu: 200m
       memory: 256Mi
-
