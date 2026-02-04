@@ -12,14 +12,6 @@ loki:
       ruler: ruler
       admin: admin
 
-grafana:
-  enabled: true
-  sidecar:
-    datasources:
-      enabled: true
-      defaultDatasourceEnabled: false
-
-
 deploymentMode: SingleBinary
 
 singleBinary:
