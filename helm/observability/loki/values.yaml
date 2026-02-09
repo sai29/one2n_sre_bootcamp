@@ -2,61 +2,61 @@ deploymentMode: SingleBinary
 
 loki:
   auth_enabled: false
-
+  
   commonConfig:
     replication_factor: 1
-    ring:
-      kvstore:
-        store: inmemory
-
+  
   storage:
-    type: filesystem
-
+    type: 'filesystem'
+  
   schemaConfig:
     configs:
-      - from: 2024-04-01
+      - from: "2024-01-01"
         store: tsdb
         object_store: filesystem
         schema: v13
         index:
-          prefix: index_
+          prefix: loki_index_
           period: 24h
-
-  storage_config:
-    filesystem:
-      directory: /var/loki/chunks
-    tsdb_shipper:
-      active_index_directory: /var/loki/index
-      cache_location: /var/loki/index-cache
-
-  limits_config:
-    reject_old_samples: false
 
 singleBinary:
   replicas: 1
-
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
   persistence:
     enabled: true
     size: 10Gi
 
-memberlist:
-  enabled: false
+read:
+  replicas: 0
 
-chunksCache:
-  enabled: false
+write:
+  replicas: 0
 
-resultsCache:
-  enabled: false
-
-indexGateway:
-  enabled: false
-
-gateway:
-  enabled: false
+backend:
+  replicas: 0
 
 monitoring:
   serviceMonitor:
     enabled: true
+  
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false
 
 test:
+  enabled: false
+
+lokiCanary:
+  enabled: false
+
+gateway:
   enabled: false
