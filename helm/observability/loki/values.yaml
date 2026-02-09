@@ -4,9 +4,9 @@ loki:
 
   commonConfig:
     replication_factor: 1
-
-  memberlist:
-    enabled: false
+    ring:
+      kvstore:
+        store: inmemory
 
   storage:
     type: 'filesystem'
@@ -14,6 +14,9 @@ loki:
       chunks: chunks
       ruler: ruler
       admin: admin
+
+memberlist:
+  enabled: false
 
 deploymentMode: SingleBinary
 
