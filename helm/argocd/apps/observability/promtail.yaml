@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: promtail
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: promtail
+      targetRevision: 6.17.1
+      helm:
+        valueFiles:
+          - $values/helm/observability/promtail/values.yaml
+
+
+    - repoURL: https://github.com/sai29/one2n_sre_bootcamp.git
+      targetRevision: main
+      ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
