@@ -5,6 +5,9 @@ loki:
   commonConfig:
     replication_factor: 1
 
+  memberlist:
+    enabled: false
+
   storage:
     type: 'filesystem'
     bucketNames:
