@@ -1,6 +1,7 @@
+deploymentMode: SingleBinary
+
 loki:
   auth_enabled: false
-  useTestSchema: true
 
   commonConfig:
     replication_factor: 1
@@ -9,49 +10,53 @@ loki:
         store: inmemory
 
   storage:
-    type: 'filesystem'
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
+    type: filesystem
 
-memberlist:
-  enabled: false
+  schemaConfig:
+    configs:
+      - from: 2024-04-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
 
-deploymentMode: SingleBinary
+  storage_config:
+    filesystem:
+      directory: /var/loki/chunks
+    tsdb_shipper:
+      active_index_directory: /var/loki/index
+      cache_location: /var/loki/index-cache
+
+  limits_config:
+    reject_old_samples: false
 
 singleBinary:
   replicas: 1
-
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
 
   persistence:
     enabled: true
     size: 10Gi
 
-read:
-  replicas: 0
+memberlist:
+  enabled: false
 
-write:
-  replicas: 0
+chunksCache:
+  enabled: false
 
-backend:
-  replicas: 0
+resultsCache:
+  enabled: false
+
+indexGateway:
+  enabled: false
+
+gateway:
+  enabled: false
 
 monitoring:
   serviceMonitor:
     enabled: true
-
-  selfMonitoring:
-    enabled: false
-    grafanaAgent:
-      installOperator: false
 
 test:
   enabled: false
