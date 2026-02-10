@@ -25,9 +25,6 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
 
 grafana:
-  sidecar:
-    datasources:
-      enabled: false
   enabled: true
   
   adminPassword: admin
