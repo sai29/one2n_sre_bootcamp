@@ -4,6 +4,16 @@ loki:
   ruler:
     enabled: false
   auth_enabled: false
+  podSecurityContext:
+    runAsUser: 0
+    runAsNonRoot: false
+  
+  containerSecurityContext:
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   
   commonConfig:
     replication_factor: 1
@@ -27,12 +37,6 @@ singleBinary:
   podSecurityContext:
     runAsUser: 0
     runAsNonRoot: false
-  containerSecurityContext:
-    readOnlyRootFilesystem: false
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
   resources:
     requests:
       cpu: 100m
