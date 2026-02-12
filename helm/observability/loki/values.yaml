@@ -23,9 +23,8 @@ singleBinary:
   replicas: 1
 
   podSecurityContext:
-    fsGroup: 10001
-    runAsUser: 10001
-    runAsNonRoot: true
+    runAsUser: 0
+    runAsNonRoot: false
   resources:
     requests:
       cpu: 100m
