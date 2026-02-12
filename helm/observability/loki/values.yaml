@@ -21,7 +21,11 @@ loki:
 
 singleBinary:
   replicas: 1
-  
+
+  podSecurityContext:
+    fsGroup: 10001
+    runAsUser: 10001
+    runAsNonRoot: true
   resources:
     requests:
       cpu: 100m
