@@ -26,6 +26,10 @@ prometheus:
 
 grafana:
   enabled: true
+
+  sidecar:
+      datasources:
+        defaultDatasourceEnabled: false  
   
   adminPassword: admin
   
