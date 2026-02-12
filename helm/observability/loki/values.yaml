@@ -27,6 +27,12 @@ singleBinary:
   podSecurityContext:
     runAsUser: 0
     runAsNonRoot: false
+  containerSecurityContext:
+    readOnlyRootFilesystem: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   resources:
     requests:
       cpu: 100m
