@@ -3,13 +3,23 @@ config:
     host: student-api-db.student-api.svc.cluster.local
     port: "5432"
     database: student_api
-    userSecret:
-      name: student-api-db-secret
-      key: DB_USERNAME
-    passwordSecret:
-      name: student-api-db-secret
-      key: DB_PASSWORD
+    user: $(DB_USERNAME)
+    password: $(DB_PASSWORD)
     sslmode: disable
+
+extraEnvs:
+  - name: DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: student-api-db-secret
+        namespace: student-api
+        key: DB_USERNAME
+  - name: DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: student-api-db-secret
+        namespace: student-api
+        key: DB_PASSWORD
 
 serviceMonitor:
   enabled: true
