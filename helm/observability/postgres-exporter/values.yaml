@@ -1,0 +1,29 @@
+config:
+  datasource:
+    host: student-api-db.student-api.svc.cluster.local
+    port: "5432"
+    database: student_api
+    userSecret:
+      name: student-api-db-secret
+      key: DB_USERNAME
+    passwordSecret:
+      name: student-api-db-secret
+      key: DB_PASSWORD
+    sslmode: disable
+
+serviceMonitor:
+  enabled: true
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector:
+  type: dependent_services
