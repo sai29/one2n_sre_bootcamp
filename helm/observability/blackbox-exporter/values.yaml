@@ -1,15 +1,12 @@
 config:
-  datasource:
-    host: student-api-db.student-api.svc.cluster.local
-    port: "5432"
-    database: student_api
-    userSecret:
-      name: student-api-db-secret
-      key: DB_USERNAME
-    passwordSecret:
-      name: student-api-db-secret
-      key: DB_PASSWORD
-    sslmode: disable
+  modules:
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
 
 serviceMonitor:
   enabled: true

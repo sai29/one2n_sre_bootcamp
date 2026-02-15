@@ -20,9 +20,10 @@ prometheus:
       limits:
         cpu: 500m
         memory: 1Gi
-    
+
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
 
 grafana:
   enabled: true

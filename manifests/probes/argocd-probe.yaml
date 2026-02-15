@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: argocd-probe
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: argocd-server
+  interval: 30s
+  prober:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://argocd-server.argocd.svc.cluster.local
+      labels:
+        service: argocd
+        endpoint: server
+  module: http_2xx

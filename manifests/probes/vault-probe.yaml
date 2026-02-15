@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: vault-probe
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack
+spec:
+  jobName: vault-health
+  interval: 30s
+  prober:
+    url: blackbox-exporter.observability.svc.cluster.local:9115
+    path: /probe
+  targets:
+    staticConfig:
+      static:
+        - http://vault.vault.svc.cluster.local:8200/v1/sys/health
+      labels:
+        service: vault
+        endpoint: health
+  module: http_2xx
