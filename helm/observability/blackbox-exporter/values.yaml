@@ -32,3 +32,6 @@ resources:
 
 nodeSelector:
   type: dependent_services
+
+configReloader:
+  enabled: false
