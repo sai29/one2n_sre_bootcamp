@@ -463,4 +463,100 @@ Expected response:
 ```
 ---
 
+## Observability Stack Setup
 
+The observability stack provides comprehensive monitoring, logging, and visualization for the entire system. 
+**Note**: The stack gets installed automatically when you apply the root Argo CD app.
+
+### Components
+
+- **Prometheus** - Metrics collection and storage
+- **Loki** - Log aggregation and storage  
+- **Grafana** - Visualization and dashboards
+- **Promtail** - Log shipper (collects logs and sends to Loki)
+- **Postgres Exporter** - Database metrics exporter
+- **Blackbox Exporter** - Endpoint uptime and latency monitoring
+- **Node Exporter** - Node-level system metrics
+- **Kube-state-metrics** - Kubernetes object metrics
+
+### Deployment
+
+The observability stack is automatically deployed via ArgoCD when you deploy the root application. All components are deployed in the `observability` namespace.
+
+**Deployment order (via sync-waves):**
+1. Prometheus CRDs (sync-wave: 1)
+2. Kube-prometheus-stack (sync-wave: 2) - Includes Prometheus, Grafana, Alertmanager, Node Exporter, Kube-state-metrics
+3. Loki (sync-wave: 3)
+4. Postgres Exporter (sync-wave: 3)
+5. Blackbox Exporter (sync-wave: 3)
+6. Promtail (sync-wave: 4)
+7. Blackbox Probes (sync-wave: 4)
+
+### Accessing Grafana
+
+Port-forward Grafana service:
+
+```bash
+kubectl port-forward -n observability svc/kube-prometheus-stack-grafana 3000:80
+```
+
+Access Grafana at http://localhost:3000
+- Username: `admin`
+- Password: `admin` (default)
+
+### Accessing Prometheus
+
+Port-forward Prometheus service:
+
+```bash
+kubectl port-forward -n observability svc/kube-prometheus-stack-prometheus 9090:9090
+```
+
+Access Prometheus at http://localhost:9090
+
+### Grafana Data Sources
+
+Grafana is pre-configured with two data sources:
+- **Prometheus** - For metrics queries (URL: `http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090`)
+- **Loki** - For log queries (URL: `http://loki:3100`)
+
+### Monitoring Endpoints
+
+Blackbox exporter monitors the following endpoints via Probe CRDs:
+
+- **Student API** - `http://student-api.student-api.svc.cluster.local:4000/v1/healthcheck`
+- **ArgoCD Server** - `https://argocd-server.argocd.svc.cluster.local`
+- **Vault** - `http://vault.vault.svc.cluster.local:8200/v1/sys/health`
+
+Probe configurations are defined in `manifests/probes/` and are automatically synced via ArgoCD as a separate Argo CD app.
+
+### Log Collection
+
+Promtail is configured to collect logs only from the `student-api` namespace and send them to Loki. Logs are filtered to include only application logs.
+
+### Verification
+
+Check that all observability components are running:
+
+```bash
+kubectl get pods -n observability
+```
+
+Verify Prometheus is scraping targets:
+
+```bash
+kubectl port-forward -n observability svc/kube-prometheus-stack-prometheus 9090:9090
+# Open http://localhost:9090 → Status → Targets
+```
+
+Check probe metrics:
+
+```bash
+# In Prometheus UI, query:
+probe_success{job="student-api-healthcheck"}
+probe_success{job="vault"}
+probe_success{job="argocd-server"}
+# Should show probe_success=1 for all targets
+```
+
+---
