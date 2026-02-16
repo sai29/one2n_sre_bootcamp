@@ -90,8 +90,14 @@ For Kubernetes-based deployments, a local Minikube cluster is used:
 minikube start
 ```
 ---
+## Deployment Methods (Learning Journey)
 
-## Kubernetes Deployment (Raw Manifests)
+This section documents the evolution of deployment approaches used in this project.
+
+## Kubernetes Deployment (Legacy - For Reference Only)
+
+This section documents the initial deployment approach using raw Kubernetes manifests. 
+**Current deployment method:** See [ArgoCD section](#deploying-with-argocd-gitops) below
 
 
 ### Manifest Structure
@@ -114,7 +120,7 @@ k8s/
 
 ---
 
-### Vault Setup (Dev Mode)
+### Vault Setup (Dev Mode) (Legacy - For reference only)
 
 #### For the raw Kubernetes deployment, **Vault was deployed in dev mode** for learning purposes and to speed up the vault -> eso -> k8s secrets wiring process.
 ---
@@ -133,7 +139,7 @@ kubectl get pods -n student-api
 
 ---
 
-### Access Vault Locally
+### Access Vault Locally 
 
 Port-forward the Vault service:
 
@@ -212,22 +218,12 @@ Check that all pods are running:
 `kubectl get pods -n student-api`
 ```
 
-Verify the API:
-
-```bash
-curl http://<node-ip>:<node-port>/v1/healthcheck
-```
 
 
-Expected response:
+## Deploying the Stack Using Helm  (Legacy)
 
-```bash
-{"env":"development","status":"available"}
-```
----
-
-
-## Deploying the Stack Using Helm
+This section documents the approach using helm chart. 
+**Current deployment method:** See [ArgoCD section](#deploying-with-argocd-gitops) below
 
 
 ---
@@ -240,65 +236,6 @@ Expected response:
 
 
 ---
-
-### Helm Chart Structure
-
-```
-helm/
-├── namespaces     # Namespace creation (Helm-owned)
-├── vault          # HashiCorp Vault (community chart + values)
-├── postgres       # PostgreSQL (Bitnami chart, vendored)
-├── secrets        # SecretStore + ExternalSecret (Vault → K8s wiring)
-└── student-api    # REST API (Deployment, Service, ConfigMap)
-```
-
-Each chart has a **single responsibility** and clear boundaries.
-
----
-
-### One-Time Manual Steps (Required)
-
-#### Note on Vault storage (local setup)
-
-In the local Minikube environment, Vault is run without durable persistence due to hostPath permission constraints.
-
-The Helm chart is structured to support persistent storage, but for local development the focus is on Helm ownership, dependency wiring, and end-to-end secret propagation rather than data durability.
-
-In a real environment, Vault would run with a persistent backend (e.g. file, Raft, or cloud storage) and proper volume permissions.
-
-1. Initialize Vault:
-
-   ```
-   kubectl exec -n student-api -it vault-0 -- vault operator init
-   ```
-
-2. Unseal Vault (run 3 times with different keys out of the 5 generated in the previous step):
-
-   ```
-   kubectl exec -n student-api -it vault-0 -- vault operator unseal
-   ```
-
-3. Create a Vault policy for External Secrets Operator:
-
-   ```
-   kubectl exec -n student-api -it vault-0 -- vault policy write eso-policy - <<EOF
-   path "secret/data/student-api/*" {
-     capabilities = ["read"]
-   }
-   EOF
-   ```
-
-4. Store the Vault token as a Kubernetes Secret:
-
-   ```
-   kubectl create secret generic vault-eso-token \
-     -n student-api \
-     --from-literal=token=<VAULT_TOKEN>
-   ```
-
----
-
-### Deployment Order (Authoritative)
 
 Helm charts must be installed in the following order:
 
@@ -345,24 +282,185 @@ Helm charts must be installed in the following order:
 
 ---
 
-### Verification
 
-Check that all pods are running:
+### Helm Chart Structure
 
 ```
-kubectl get pods -n student-api
+helm/
+├── namespaces     # Namespace creation (Helm-owned)
+├── vault          # HashiCorp Vault (community chart + values)
+├── postgres       # PostgreSQL (Bitnami chart, vendored)
+├── secrets        # SecretStore + ExternalSecret (Vault → K8s wiring)
+└── student-api    # REST API (Deployment, Service, ConfigMap)
+```
+
+Each chart has a **single responsibility** and clear boundaries.
+
+
+---
+## Deploying with ArgoCD (GitOps)
+
+This project uses ArgoCD for GitOps-based deployments. All infrastructure and applications are managed via ArgoCD Applications defined in `helm/argocd/apps/`.
+
+
+
+
+
+### Prerequisites
+
+* Kubernetes cluster (tested with Minikube)
+* `kubectl`
+* ArgoCD CLI (optional, for CLI access)
+
+### Install ArgoCD
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+Wait for ArgoCD to be ready.
+
+### Access ArgoCD UI
+
+Get the admin password:
+
+```bash
+ argocd admin initial-password -n argocd
+```
+
+Port-forward ArgoCD server:
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Access ArgoCD UI at https://localhost:8080 
+- Username: `admin`
+- Password: (from the command above)
+
+
+### Deploy Root Application
+
+The root application syncs all other applications from the Git repository:
+
+```bash
+kubectl apply -f helm/argocd/root-app.yaml
+```
+
+This will automatically deploy:
+- Infrastructure (namespaces, Vault, PostgreSQL, External Secrets Operator)
+- Applications (Student API, secrets, migrations)
+- Observability stack (Prometheus, Loki, Grafana, Promtail, exporters)
+
+### One-Time Manual Steps - Vault setup
+
+**Note:** Vault is setup in memory for learning purposes.
+
+Before deploying applications, complete these one-time setup steps:
+
+#### 1. Initialize and Unseal Vault
+
+After Vault is deployed (via ArgoCD), initialize it:
+
+```bash
+kubectl exec -n vault -it vault-0 -- vault operator init
+```
+
+Unseal Vault (run 3 times with different unseal keys):
+
+```bash
+kubectl exec -n vault -it vault-0 -- vault operator unseal <UNSEAL_KEY>
+```
+
+
+#### 2. Login to Vault
+Use the root token from the initialization output:
+
+```bash
+kubectl exec -n vault -it vault-0 -- vault login <ROOT_TOKEN>
+```
+**Note**: Root token is used for simplicity in this learning setup. In production, you would create policies and use service-specific tokens.
+
+#### 3. Create Vault KV Secret Engine
+
+Create a KV v2 secret engine at path `kv`:
+
+```bash
+kubectl exec -n vault -it vault-0 -- vault secrets enable -path=kv kv-v2
+```
+
+#### 4. Store Database Credentials in Vault
+
+```bash
+kubectl exec -n vault -it vault-0 -- vault kv put kv/student-api/db \
+  username=student_api \
+  password=pa55word \
+  database=student_api \
+  POSTGRES_PASSWORD=pa55word
+```
+
+
+#### 5. Store Vault root Token for External Secrets Operator
+
+
+Store the token as a Kubernetes Secret:
+
+```bash
+kubectl create secret generic vault-eso-token \
+  -n student-api \
+  --from-literal=token=<ROOT_TOKEN>
+```
+**Note**: Root token is used for simplicity in this learning setup. In production, you would create policies and use service-specific tokens.
+
+---
+
+### Application Structure
+
+```
+helm/argocd/apps/
+├── infra/          # Infrastructure components (sync-wave: -2 to -1)
+│   ├── namespaces.yaml
+│   ├── postgres.yaml
+│   ├── vault.yaml
+│   └── external-secrets.yaml
+├── apps/            # Application components (sync-wave: 0 to 2)
+│   ├── student-api.yaml
+│   ├── student-api-secrets.yaml
+│   └── student-api-migrations.yaml
+└── observability/  # Observability stack (sync-wave: 1 to 4)
+    ├── prometheus-crds.yaml
+    ├── kube-prometheus-stack.yaml
+    ├── loki.yaml
+    ├── promtail.yaml
+    ├── postgres-exporter.yaml
+    ├── blackbox-exporter.yaml
+    └── probes.yaml
+```
+
+Applications are deployed in order based on `sync-wave` annotations to ensure dependencies are created first.
+
+### Verification
+
+
+Verify all pods are running:
+
+```bash
+kubectl get pods -A
 ```
 
 Verify the API:
 
-```
+```bash
 curl http://<node-ip>:<node-port>/v1/healthcheck
 ```
 
+
 Expected response:
 
-```
+```bash
 {"env":"development","status":"available"}
 ```
-
 ---
+
+
