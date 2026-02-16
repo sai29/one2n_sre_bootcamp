@@ -14,8 +14,8 @@ spec:
   targets:
     staticConfig:
       static:
-        - http://argocd-server.argocd.svc.cluster.local
+        - https://argocd-server.argocd.svc.cluster.local
       labels:
         service: argocd
         endpoint: server
-  module: http_2xx
+  module: http_2xx_insecure
