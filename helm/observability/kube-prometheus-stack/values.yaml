@@ -39,11 +39,11 @@ grafana:
   
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
       cpu: 200m
-      memory: 256Mi
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
   
   datasources:
     datasources.yaml:
@@ -59,6 +59,12 @@ grafana:
           url: http://loki:3100
           access: proxy
           isDefault: false
+
+  env:
+    GF_FEATURE_TOGGLES_ENABLE: "disableKubernetesAPIServer"
+    GF_DATABASE_MAX_IDLE_CONN: 10
+    GF_DATABASE_MAX_OPEN_CONN: 100
+    GF_DATABASE_CONN_MAX_LIFETIME: 14400
 
 alertmanager:
   enabled: true
