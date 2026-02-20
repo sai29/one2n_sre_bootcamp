@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func (app *application) routes() http.Handler {
@@ -11,6 +12,7 @@ func (app *application) routes() http.Handler {
 
 	r.Use(app.recoverPanic())
 	r.Use(app.requestLogger())
+	r.Use(prometheusMiddleware())
 
 	r.NoRoute(func(c *gin.Context) {
 		app.notFoundResponse(c)
@@ -20,6 +22,7 @@ func (app *application) routes() http.Handler {
 		app.methodNotAllowedResponse(c)
 	})
 
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	r.GET("/v1/healthcheck", app.healthCheckHandler)
 
 	v1 := r.Group("/v1")
