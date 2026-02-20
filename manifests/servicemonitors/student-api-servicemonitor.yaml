@@ -2,13 +2,14 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: student-api
-  namespace: student-api
+  namespace: observability
   labels:
     release: kube-prometheus-stack
 spec:
   selector:
     matchLabels:
-      app: student-api
+      app.kubernetes.io/name: student-api
+      app.kubernetes.io/instance: student-api
   endpoints:
   - port: http
     path: /metrics
