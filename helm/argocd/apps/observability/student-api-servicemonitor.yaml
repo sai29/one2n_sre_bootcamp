@@ -13,7 +13,7 @@ spec:
     path: manifests/servicemonitors
   destination:
     server: https://kubernetes.default.svc
-    namespace: observability
+    namespace: student-api
   syncPolicy:
     automated:
       prune: true
