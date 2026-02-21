@@ -24,6 +24,8 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     probeSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    serviceMonitorSelector: {}
 
 grafana:
   enabled: true
