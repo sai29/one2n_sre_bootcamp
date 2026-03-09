@@ -1,0 +1,20 @@
+POST http://localhost:4000/v1/students
+@bodies/student-1.json
+
+POST http://localhost:4000/v1/students
+@bodies/student-2.json
+
+POST http://localhost:4000/v1/students
+@bodies/student-3.json
+
+GET http://localhost:4000/v1/students
+
+GET http://localhost:4000/v1/students/1
+
+PATCH http://localhost:4000/v1/students/1
+@bodies/student-1-update.json
+
+PATCH http://localhost:4000/v1/students/2
+@bodies/student-2-update.json
+
+DELETE http://localhost:4000/v1/students/3
