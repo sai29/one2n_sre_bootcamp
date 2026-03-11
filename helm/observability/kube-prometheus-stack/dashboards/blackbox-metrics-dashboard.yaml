@@ -121,7 +121,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "Vault uptime check",
+          "title": "Vault uptime",
           "type": "timeseries"
         },
         {
@@ -313,7 +313,7 @@ data:
               "refId": "A"
             }
           ],
-          "title": "API healthcheck",
+          "title": "API uptime",
           "type": "timeseries"
         }
       ],
