@@ -86,3 +86,14 @@ spec:
           annotations:
             summary: "Critical component restarted (DB, Vault, or ArgoCD)"
             description: "One of the critical services (Postgres DB, Hashicorp Vault, or ArgoCD server) has restarted within the last 15 minutes."
+
+    - name: slack-test
+      rules:
+        - alert: TestSlackAlert
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: info
+          annotations:
+            summary: "Test Slack alert"
+            description: "This is a test alert to verify Slack integration."
