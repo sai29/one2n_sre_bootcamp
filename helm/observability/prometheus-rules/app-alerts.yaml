@@ -93,7 +93,7 @@ spec:
           expr: vector(1)
           for: 1m
           labels:
-            severity: info
+            severity: warning
           annotations:
             summary: "Test Slack alert"
             description: "This is a test alert to verify Slack integration."
