@@ -70,11 +70,11 @@ grafana:
 
 alertmanager:
   enabled: true
-  
+
   alertmanagerSpec:
     nodeSelector:
       type: dependent_services
-    
+
     resources:
       requests:
         cpu: 50m
@@ -82,6 +82,36 @@ alertmanager:
       limits:
         cpu: 200m
         memory: 256Mi
+
+    secrets:
+      - alertmanager-slack-webhook
+
+  config:
+    global:
+      resolve_timeout: 5m
+
+    route:
+      receiver: slack
+      group_by: ['alertname']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+
+    receivers:
+      - name: slack
+        slack_configs:
+          - api_url_file: /etc/alertmanager/secrets/alertmanager-slack-webhook/slack-api-url
+            channel: "#alerts"      # your Slack channel
+            send_resolved: true
+            title: '{{ .Status | toUpper }}: {{ .CommonAnnotations.summary }}'
+            text: |-
+              *Alert:* {{ .CommonLabels.alertname }}
+              *Summary:* {{ .CommonAnnotations.summary }}
+              *Description:* {{ .CommonAnnotations.description }}
+              *Severity:* {{ .CommonLabels.severity }}
+              *Status:* {{ .Status }}
+              *StartsAt:* {{ .StartsAt }}
+              *Labels:* {{ .CommonLabels }}
 
 prometheusOperator:
   nodeSelector:
