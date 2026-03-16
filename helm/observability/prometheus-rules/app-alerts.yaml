@@ -1,0 +1,88 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-alerts
+  namespace: observability
+  labels:
+    release: kube-prometheus-stack   # MUST match your kube-prometheus-stack Prometheus ruleSelector.label
+spec:
+  groups:
+    - name: node-resources
+      rules:
+        - alert: HighCPUUtilization
+          expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on {{ $labels.instance }}"
+            description: "CPU utilization is above 80% for more than 5 minutes."
+
+
+        - alert: HighDiskUtilization
+          expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}) * 100) > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High disk usage on {{ $labels.instance }}"
+            description: "Root filesystem usage is above 85% for more than 5 minutes."
+
+    - name: app-traffic
+      rules:
+        - alert: HighErrorRate
+          expr: (sum(rate(http_requests_total{status=~"5.."}[10m])) / sum(rate(http_requests_total[10m]))) > 0.05
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High 5xx error rate (10m window)"
+            description: "5xx error rate is above 5% over the last 10 minutes."
+
+        - alert: HighLatencyP90
+          expr: histogram_quantile(0.90, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 0.3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High P90 latency (>300ms)"
+            description: "P90 HTTP request latency is above 300ms for more than 5 minutes."
+        - alert: HighLatencyP95
+          expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High P95 latency (>500ms)"
+            description: "P95 HTTP request latency is above 500ms for more than 5 minutes."
+        - alert: HighLatencyP99
+          expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High P99 latency (>1s)"
+            description: "P99 HTTP request latency is above 1s for more than 5 minutes."
+
+        - alert: HighRequestVolume
+          expr: sum(rate(http_requests_total[5m])) > 50
+          for: 5m
+          labels:
+            severity: info
+          annotations:
+            summary: "High request rate"
+            description: "Total incoming HTTP request rate is above 50 requests/sec over the last 5 minutes."
+
+    - name: critical-service-restarts
+      rules:
+        - alert: CriticalServiceRestart
+          expr: |
+            (increase(kube_pod_container_status_restarts_total{namespace="student-api",pod=~"student-api-db-.*"}[15m]) > 0)
+            or (increase(kube_pod_container_status_restarts_total{namespace="vault",pod=~"vault-.*"}[15m]) > 0)
+            or (increase(kube_pod_container_status_restarts_total{namespace="argocd",pod=~"argocd-server-.*"}[15m]) > 0)
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Critical component restarted (DB, Vault, or ArgoCD)"
+            description: "One of the critical services (Postgres DB, Hashicorp Vault, or ArgoCD server) has restarted within the last 15 minutes."
