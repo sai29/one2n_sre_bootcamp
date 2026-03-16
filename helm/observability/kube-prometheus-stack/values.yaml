@@ -114,7 +114,6 @@ alertmanager:
               *Description:* {{ .CommonAnnotations.description }}
               *Severity:* {{ .CommonLabels.severity }}
               *Status:* {{ .Status }}
-              *StartsAt:* {{ .StartsAt }}
               *Labels:* {{ .CommonLabels }}
 
 prometheusOperator:
